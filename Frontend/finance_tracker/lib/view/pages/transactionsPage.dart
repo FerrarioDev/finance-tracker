@@ -1,13 +1,11 @@
 import 'package:finance_tracker/controller/transactionsController.dart';
 import 'package:finance_tracker/model/Transaction.dart';
 import 'package:finance_tracker/view/widgets/AddTransactionModal.dart';
-import 'package:finance_tracker/view/widgets/transactions_list.dart';
+import 'package:finance_tracker/view/widgets/transactionsList.dart';
 import 'package:flutter/material.dart';
 
 class TransactionsPage extends StatefulWidget {
-  const TransactionsPage({super.key, required this.title});
-
-  final String title;
+  const TransactionsPage({super.key});
 
   @override
   State<TransactionsPage> createState() => _TransactionsPageState();
@@ -17,6 +15,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   TransactionType selectedFilter = TransactionType.ALL; // Default filter is ALL
   List<Transaction> transactions = [];
   List<Transaction> filteredTransactions = [];
+  bool loading = true;
 
   @override
   void initState() {
@@ -26,10 +25,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   void _loadTransactions() async {
+    setState(() {
+      loading = true; // Start loading
+    });
+
     final fetchedTransactions = await getTransactions();
+
     setState(() {
       transactions = fetchedTransactions;
-      _applyFilter(); // Apply filter to the transactions
+      _applyFilter();
+      loading = false; // End loading
     });
   }
 
@@ -40,8 +45,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         filteredTransactions = transactions;
       } else {
         filteredTransactions = transactions.where((transaction) {
-          String transtest = transaction.transactionType.name;
-          print(filteredTransactions);
           return transaction.transactionType.index ==
               selectedFilter.index; // Assuming 'type' is a string like "INCOME"
         }).toList();
@@ -81,70 +84,66 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: TransactionType.values.map((type) {
-                String filterLabel;
-                switch (type) {
-                  case TransactionType.ALL:
-                    filterLabel = "All";
-                    break;
-                  case TransactionType.EXPENSE:
-                    filterLabel = "Expenses";
-                    break;
-                  case TransactionType.INCOME:
-                    filterLabel = "Income";
-                    break;
-                  case TransactionType.TRANSFER:
-                    filterLabel = "Transfers";
-                    break;
-                }
+        child: loading
+            ? const CircularProgressIndicator() // Show loading indicator
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: TransactionType.values.map((type) {
+                      String filterLabel;
+                      switch (type) {
+                        case TransactionType.ALL:
+                          filterLabel = "All";
+                          break;
+                        case TransactionType.EXPENSE:
+                          filterLabel = "Expenses";
+                          break;
+                        case TransactionType.INCOME:
+                          filterLabel = "Income";
+                          break;
+                        case TransactionType.TRANSFER:
+                          filterLabel = "Transfers";
+                          break;
+                      }
 
-                return ChoiceChip(
-                  label: Text(filterLabel),
-                  selected: selectedFilter == type,
-                  onSelected: (bool selected) {
-                    if (selected) {
-                      setState(() {
-                        selectedFilter = type;
-                        _applyFilter(); // Re-apply the filter whenever a new filter is selected
-                      });
-                    }
-                  },
-                  backgroundColor: Colors.grey[10],
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(20.0), // Rounded corners
-                    side: BorderSide(
-                      color: selectedFilter == type
-                          ? Colors.blue
-                          : const Color.fromARGB(255, 204, 204, 204),
-                      width: 1.0, // Border width
-                    ),
+                      return ChoiceChip(
+                        label: Text(filterLabel),
+                        selected: selectedFilter == type,
+                        onSelected: (bool selected) {
+                          if (selected) {
+                            setState(() {
+                              selectedFilter = type;
+                              _applyFilter();
+                            });
+                          }
+                        },
+                        backgroundColor: Colors.grey[10],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                          side: BorderSide(
+                            color: selectedFilter == type
+                                ? Colors.blue
+                                : const Color.fromARGB(255, 204, 204, 204),
+                            width: 1.0,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
-            ),
-            TransactionsList(
-              transactions:
-                  filteredTransactions, // Pass the filtered transactions
-            ),
-          ],
-        ),
+                  TransactionsList(
+                    transactions: filteredTransactions,
+                  ),
+                ],
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTransactionModal(context),
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }

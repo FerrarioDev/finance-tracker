@@ -1,21 +1,18 @@
 import 'dart:convert';
 
+import 'package:finance_tracker/model/Budget.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:finance_tracker/model/Category.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-String uri = dotenv.get('API_URI');
+String uri = dotenv.get("API_URI");
 
-Future<List<MyCategory>> getCategoryByType(CategoryType categoryType) async {
-  String typeString = categoryType.toString().split('.').last;
-
+Future<List<Budget>> getBudgets() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  print(prefs.getString('auth_token'));
   String? token = prefs.getString('auth_token');
 
   final response = await http.get(
-    Uri.parse('$uri/category/$typeString'),
+    Uri.parse('$uri/budgets'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token'
@@ -23,10 +20,9 @@ Future<List<MyCategory>> getCategoryByType(CategoryType categoryType) async {
   );
 
   if (response.statusCode == 200) {
-    final List<dynamic> categoryList =
-        jsonDecode(response.body) as List<dynamic>;
-    return MyCategory.fromJsonList(categoryList);
+    final List<dynamic> budgetList = jsonDecode(response.body) as List<dynamic>;
+    return Budget.fromJsonList(budgetList);
   } else {
-    throw Exception("Failed to load categorys");
+    throw Exception('Failed to load budgets');
   }
 }

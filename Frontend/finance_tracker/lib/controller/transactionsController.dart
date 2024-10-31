@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:finance_tracker/model/Transaction.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 String uri = dotenv.get('API_URI');
-String token =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYW1pQGNhbWkuY29tIiwiaWF0IjoxNzI5NDU3NzIxLCJleHAiOjE3Mjk1NDQxMjF9.1TdYc4CPiPMRBzZTjZBMCFWyfYMCmDWeZ0Kp0KlcJR0";
+
 Future<List<Transaction>> getTransactions() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('auth_token');
+
   final response = await http.get(
     Uri.parse('$uri/transactions'),
     headers: <String, String>{
@@ -25,6 +28,9 @@ Future<List<Transaction>> getTransactions() async {
 }
 
 Future<Transaction> createTransaction(Transaction transaction) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('auth_token');
+
   final transactionJson = {
     'user': transaction.userId,
     'category': transaction.categoryId,

@@ -1,5 +1,5 @@
-import 'package:finance_tracker/view/pages/login_page.dart';
-import 'package:finance_tracker/view/pages/transactions_page.dart';
+import 'package:finance_tracker/view/pages/loginPage.dart';
+import 'package:finance_tracker/view/pages/transactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 68, 159, 243)),
         useMaterial3: true,

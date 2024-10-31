@@ -1,5 +1,6 @@
 import 'package:finance_tracker/controller/authController.dart';
-import 'package:finance_tracker/view/pages/transactions_page.dart';
+import 'package:finance_tracker/view/pages/homePage.dart';
+import 'package:finance_tracker/view/pages/transactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -29,7 +30,7 @@ class _loginPageState extends State<LoginPage> {
 
     if (result.containsKey("token")) {
       // If login was successful and we got the token
-      String token = result["token"];
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login Successful")),
       );
@@ -37,11 +38,7 @@ class _loginPageState extends State<LoginPage> {
       // Save the token for future requests or navigate to the next screen
       // Example: Navigator.pushReplacement(...);
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const TransactionsPage(
-                    title: "Transactions",
-                  )));
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
     } else {
       // If login failed, show an error message
       ScaffoldMessenger.of(context).showSnackBar(
